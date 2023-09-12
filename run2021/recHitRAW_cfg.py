@@ -73,13 +73,14 @@ options.parseArguments()
 
 rawTag    = cms.InputTag(options.rawTag)
 runNumber = str(options.runNumber)
-GT        = "120X_dataRun2_v2"
+GT        = "132X_dataRun3_HLT_v2"
 
 #-----------------------------------
 # Standard CMSSW Imports/Definitions
 #-----------------------------------
 process = cms.Process('MyTree')
 
+#Saray:Including process.load(...GlobalTag)
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 process.GlobalTag.globaltag = GT
 
@@ -93,7 +94,7 @@ process.es_pool = cms.ESSource("PoolDBESSource",
         )
     ),
     connect = cms.string('frontier://FrontierProd/CMS_CONDITIONS'),
-        authenticationMethod = cms.untracked.uint32(0)
+        authenticationMethod = cms.untracked.uint32(1)
     )
 
 #-----------------------------------
@@ -139,23 +140,39 @@ else:
     )
 
 #----------
-_emap = {
-    'emap_ext'  : "QWAna/QWNtrkOfflineProducer/run2021/ZDCemap_2021_pilotRun_M_only.v2.txt"
-}
 
-if options.emap != '':
-    process.es_ascii = cms.ESSource(
-        'HcalTextCalibrations',
-        input = cms.VPSet(
-            cms.PSet(
-                object = cms.string('ElectronicsMap'),
-                file = cms.FileInPath(_emap[options.emap])
-                )
-            )
+#_emap = {
+#    'emap_ext'  : "OfflineProducer/QWNtrkOfflineProducer-ZDC2022/run2021/emap_tunel_both_numer.txt"
+#}
+
+#if options.emap != '':
+#    process.es_ascii = cms.ESSource(
+#        'HcalTextCalibrations',
+#        input = cms.VPSet(
+#            cms.PSet(
+#                object = cms.string('ElectronicsMap'),
+#                file = cms.FileInPath(_emap[options.emap])
+#                )
+#            )
+#        )
+#    process.es_prefer = cms.ESPrefer('HcalTextCalibrations', 'es_ascii')
+#else:
+#    process.es_prefer_es_pool = cms.ESPrefer( "PoolDBESSource", "es_pool" )
+
+
+#Saray:Adding correct local emap and not DB conditions
+process.es_prefer = cms.ESPrefer('HcalTextCalibrations', 'es_ascii')
+process.es_ascii = cms.ESSource(
+    'HcalTextCalibrations',
+    input = cms.VPSet(
+        cms.PSet(
+
+            object = cms.string('ElectronicsMap'),
+            file = cms.FileInPath("OfflineProducer/QWNtrkOfflineProducer-ZDC2022/run2021/emap_tunel_both_numer.txt")
+
+             )
         )
-    process.es_prefer = cms.ESPrefer('HcalTextCalibrations', 'es_ascii')
-else:
-    process.es_prefer_es_pool = cms.ESPrefer( "PoolDBESSource", "es_pool" )
+    )
 
 
 
@@ -175,7 +192,7 @@ process.options = cms.untracked.PSet(
 # Files to process
 #-----------------
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(options.maxEvents)
+    input = cms.untracked.int32(1000)
     )
 
 #process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('293765:264-293765:9999')
@@ -203,12 +220,16 @@ process.load('Configuration.StandardSequences.GeometryRecoDB_cff')
 process.load("EventFilter.HcalRawToDigi.HcalRawToDigi_cfi")
 process.load('Configuration.StandardSequences.MagneticField_38T_cff')
 
+
+#Saray: adding the new  number of samples
 #set digi and analyzer
-process.hcalDigis.InputLabel = rawTag
+process.hcalDigis.InputLabel = rawTag 
+process.hcalDigis.saveQIE10DataNSamples = cms.untracked.vint32()
+process.hcalDigis.saveQIE10DataTags = cms.untracked.vstring()
 
-process.eventSelection = cms.Sequence()
-
-process.digis = cms.Sequence(process.hcalDigis)
+#Saray: I commented this because no needed. 
+#process.eventSelection = cms.Sequence()
+#process.digis = cms.Sequence(process.hcalDigis)
 
 # ZDC info
 process.load('QWZDC2018Producer_cfi')
@@ -277,7 +298,8 @@ process.zdcBX = cms.EDAnalyzer('QWZDC2018BXAnalyzer',
 
 process.digiPath = cms.Path(
     process.hltSelect *
-    process.digis *
+#    process.digis *
+    process.hcalDigis *
     process.zdcdigi *
 #    process.zdcADCFilter *
     process.QWInfo *
@@ -305,4 +327,4 @@ process.output = cms.OutputModule(
 		fileName = cms.untracked.string('digisRAW_'+runNumber+'.root')
 		)
 
-#process.outpath = cms.EndPath(process.output)
+process.outpath = cms.EndPath(process.output)
