@@ -16,5 +16,5 @@
 
 ```
 - cd OfflineProducer/QWNtrkOfflineProducer-ZDC2022/run2021
-- cmsRun recHitRAW_cfg.py runNumber=373060 runInputDir=/eos/cms/tier0/store/data/Run2023E/SpecialRandom1/RAW/v1/000/  outputTag=myoutput hlt=HLT_Random_HighRate_v1
+- cmsRun recHitRAW_cfg.py runNumber=373060 runInputDir=/eos/cms/store/group/dpg_hcal/comm_hcal/SpecialRandoms_forZDC/SpecialRandom0/RAW/v1/000/  outputTag=myoutput hlt=HLT_Random_HighRate_v1
 ```
