@@ -168,7 +168,7 @@ process.es_ascii = cms.ESSource(
         cms.PSet(
 
             object = cms.string('ElectronicsMap'),
-            file = cms.FileInPath("OfflineProducer/QWNtrkOfflineProducer-ZDC2022/run2021/emap_tunel_both_numer.txt")
+            file = cms.FileInPath("OfflineProducer/QWNtrkOfflineProducer-ZDC2022/run2021/zdc_emap_and_TPchannels.txt")
 
              )
         )
